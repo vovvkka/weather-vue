@@ -38,6 +38,10 @@ export default {
       const date = new Date(timestamp * 1000);
 
       return `Закат: ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    },
+    catchError() {
+      console.log(this.error);
+      if (this.error.cod === "404") return "Город не найден!"
     }
   },
   methods: {
@@ -48,7 +52,10 @@ export default {
 
       axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${this.city}&lang=ru&units=metric&appid=${API_KEY}`)
           .then(res => this.weather = res.data)
-          .catch(err => console.log(err));
+          .catch(err => {
+            this.weather = null;
+            this.error = err.response.data
+          });
     }
   }
 }
@@ -62,7 +69,7 @@ export default {
     <div class="info-block">
       <div class="info-block-input">
         <input type="text" placeholder="Введите город" v-model="city"/>
-        <p class="error">{{ error }}</p>
+        <p v-if="error" class="error">{{ catchError }}</p>
       </div>
       <button type="button" v-if="city" @click="getWeather">Получить погоду</button>
       <button type="button" v-else disabled>Получить погоду</button>
@@ -76,7 +83,6 @@ export default {
       <p>{{ getSunrise }}</p>
       <p>{{ getSunset }}</p>
     </div>
-
   </div>
 </template>
 
